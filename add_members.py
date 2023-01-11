@@ -31,8 +31,9 @@ group_target = config['group_target']
 api_id = int(config['api_id'])
 api_hash = config['api_hash']
 total_time_in_round = 120
-total_user_big_sleep = 35
+total_user_big_sleep = 135
 time_big_sleep = 7200
+skip_user = 2
 
 # list client
 clients = []
@@ -138,6 +139,14 @@ while i < total_user:
 
 	if status_add == 'USER_PRIVACY':
 		logging.info(status_add + ', skip user')
+		time.sleep(skip_user / total_client)
+		#this works but it overwrites the data each time, we need to append it
+		path_file = 'baduser' + '.json'
+		with open(path_file, 'a', encoding='utf-8') as f:
+			bad_user = str(user['user_id'])
+			json.dump(bad_user, f, indent=4, ensure_ascii=False)
+			f.write('\n')
+		#client.disconnect()
 
 	if status_add == 'ERROR_OTHER':
 		logging.info(status_add + ', skip user')
@@ -160,3 +169,15 @@ end_time = datetime.now()
 
 logging.info("added: " + str(total_count_added))
 logging.info("total time: " + str(end_time - start_time))
+
+
+
+#we need to be able to write a list of bad users that we cant add due to privacy
+#the code block below is the way that get_members.py opens a file and writes to it
+#we will try to hack that to include it in this file
+
+#this writes the info, we also need the string that enumerates the data location
+	#path_file = path_group + str(phone) + '.json'
+	#with open(path_file, 'w', encoding='utf-8') as f:
+	#json.dump(results, f, indent=4, ensure_ascii=False)
+	#client.disconnect()
