@@ -118,6 +118,32 @@ def update_count(path, current_index):
 		g.write(str(current_index))
 		g.close()
 
+def write_log_processed(path, list_processed):
+	"""
+	:param path: path
+	:param list_processed: list_processed
+	:return: void
+
+	"""
+	with open(path, 'w') as g:
+		g.write('\n'.join(list_processed))
+		g.close()
+
+def read_log_processed(path):
+	"""
+	:param path: path
+	:return: list member processed
+
+	"""
+	result = []
+	try:
+		with open(path, encoding='utf-8') as f:
+			result = f.read().split('\n')
+	except Exception as e:
+		pass
+
+	return result
+
 def read_data_member(path_data):
 	"""
 	:param client: path_data
