@@ -36,10 +36,7 @@ for phone in accounts:
 		except OSError as error: 
 			pass
 
-		if isinstance(group_source, str):
-			data = get_member_by_group_username(client, group_source)
-		else:
-			data = get_member_by_group_id(client, group_source)
+		data = get_member_by_group_username(client, group_source)
 
 		results = [] # list object member to save file
 

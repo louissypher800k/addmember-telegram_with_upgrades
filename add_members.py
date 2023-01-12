@@ -20,7 +20,6 @@ with open('config.json', 'r', encoding='utf-8') as f:
 root_path = os.path.dirname(os.path.abspath(__file__))
 folder_session = root_path + '/session/'
 folder_data = root_path + '/data/'
-folder_data_log = root_path + '/data-log/'
 
 accounts = config['accounts']
 
@@ -32,7 +31,7 @@ group_target = config['group_target']
 api_id = int(config['api_id'])
 api_hash = config['api_hash']
 total_time_in_round = 120
-total_user_big_sleep = 135
+total_user_big_sleep = 35
 time_big_sleep = 7200
 skip_user = 2
 
@@ -51,10 +50,6 @@ if 'from_date_active' in config:
 i = 0 # alway from 0 because have logic check user_id from target group
 count_added = 0 # count added success (in 1 big round)
 total_count_added = 0 # total count added success
-
-# file save log processed
-path_file_log = folder_data_log + '/' + str(group_target) + '.txt'
-list_id_processed = read_log_processed(path_file_log)
 
 assert len(accounts) > 0
 
@@ -111,11 +106,6 @@ while i < total_user:
 		i += 1
 		logging.info('User ' + str(user['user_id']) + ' in target group, not add')
 		continue
-
-	if str(user['user_id']) in list_id_processed:
-		i += 1
-		logging.info('User ' + str(user['user_id']) + ' is processed previous')
-		continue
 	
 	current_index = count_added % total_client
 	current_client = clients[count_added % total_client]
@@ -130,9 +120,6 @@ while i < total_user:
 
 	user_to_add = InputPeerUser(int(user[current_client['phone']]['user_id']), int(user[current_client['phone']]['access_hash']))
 	status_add = add_member_to_group(current_client['client'], current_client['group_target'], user_to_add)
-
-	list_id_processed.append(str(user['user_id']))
-	write_log_processed(path_file_log, list_id_processed)
 
 	logging.info("status_add: " + status_add)
 	if status_add == 'SUCCESS':
@@ -153,6 +140,8 @@ while i < total_user:
 	if status_add == 'USER_PRIVACY':
 		logging.info(status_add + ', skip user')
 		time.sleep(skip_user / total_client)
+		
+		#this is the code block that saves user_ids that cause errors
 		#this works but it overwrites the data each time, we need to append it
 		path_file = 'baduser' + '.json'
 		with open(path_file, 'a', encoding='utf-8') as f:
@@ -165,6 +154,12 @@ while i < total_user:
 		logging.info(status_add + ', skip user')
 		time.sleep(total_time_in_round / total_client)
 
+		#this works but it overwrites the data each time, we need to append it
+		path_file = 'baduser' + '.json'
+		with open(path_file, 'a', encoding='utf-8') as f:
+			bad_user = str(user['user_id'])
+			json.dump(bad_user, f, indent=4, ensure_ascii=False)
+			f.write('\n')
 
 	# if status_add is not FLOOD and FLOOD_WAIT
 	if status_add != 'FLOOD' and status_add != 'FLOOD_WAIT':
